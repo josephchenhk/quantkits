@@ -8,7 +8,7 @@
 import os
 from selenium import webdriver
 
-from web.proxy import Proxy
+from quantkits.web.proxy import Proxy
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
