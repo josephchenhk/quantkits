@@ -14,7 +14,12 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Driver:
 
-    def __init__(self):
+    def __init__(self, driver_path=None):
+        if not driver_path:
+            self.driver_path = f'{dir_path}/webdriver/chromedriver'
+        else:
+            self.driver_path = driver_path
+
         try:
             self.proxy = Proxy()
         except:
@@ -29,5 +34,5 @@ class Driver:
         if activate_proxy:
             proxy = self.proxy.__next__()
             chromeOptions.add_argument("--proxy-server=http://{}".format(proxy))
-        driver = webdriver.Chrome(executable_path=f'{dir_path}/webdriver/chromedriver', options=chromeOptions)
+        driver = webdriver.Chrome(executable_path=self.driver_path, options=chromeOptions)
         return driver
