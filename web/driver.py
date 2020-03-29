@@ -15,9 +15,9 @@ from quantkits.web.proxy import Proxy
 
 class Driver:
 
+
     def __init__(self):
         pass
-
 
     def chromedriver(self, activate_proxy=False):
         chromeOptions = webdriver.ChromeOptions()
