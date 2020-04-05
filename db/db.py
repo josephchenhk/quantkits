@@ -22,7 +22,7 @@ Base = declarative_base()
 class DB:
 
     def create_engine(self, user:str, password:str, address:str, port:int, database:str):
-        engine = create_engine(f"mysql+pymysql://{user}:{password}@{address}:{port}/{database}")
+        engine = create_engine(f"mysql+pymysql://{user}:{password}@{address}:{port}/{database}?charset=utf8mb4&autocommit=true")
         self.engine = engine
         # 绑定引擎
         self.metadata = MetaData(engine)
