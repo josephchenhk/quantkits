@@ -16,7 +16,7 @@ ENV CFLAGS="-g0 -Wl,--strip-all -Os" \
 RUN mkdir /root/.ssh/ && touch /root/.ssh/known_hosts && \
     ssh-keyscan github.com >> /root/.ssh/known_hosts
 COPY requirements.txt /data
-COPY ./common/requirements.txt /data/common/
+COPY ../quantkits/common /data/common/
 COPY ./algo_saas_support/requirements.txt /data/algo_saas_support/
 COPY --from=builder /blpapi /blpapi
 RUN --mount=type=ssh,id=github \
@@ -24,7 +24,7 @@ RUN --mount=type=ssh,id=github \
    -i https://mirrors.aliyun.com/pypi/simple/ \
    -r requirements.txt  &&\
    pip install --no-cache-dir --compile --index-url=https://bloomberg.bintray.com/pip/simple blpapi
-COPY . /data
+COPY .. /data
 
 EXPOSE 8003
 ENTRYPOINT [ "/data/deploy-docker/entrypoint.sh" ]

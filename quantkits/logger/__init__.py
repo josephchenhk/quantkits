@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-# @Time    : 10/4/2020 5:16 PM
+# @Time    : 29/4/2020 10:07 AM
 # @Author  : Joseph Chen
 # @Email   : josephchenhk@gmail.com
-# @FileName: log.py
+# @FileName: __init__.py.py
 # @Software: PyCharm
+
 import os
 import logging
 
@@ -28,7 +29,7 @@ fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 
 # 第五步，将logger添加到handler里面
-# logger.addHandler(fh)
+logger.addHandler(fh)
 logger.addHandler(ch)
 
 # 日志

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Time    : 16/9/2019 6:27 PM
+# @Time    : 29/4/2020 11:38 AM
 # @Author  : Joseph Chen
 # @Email   : josephchenhk@gmail.com
 # @FileName: decorators.py
@@ -12,8 +12,9 @@ import time
 RETRY_NUMBER = 5
 RETRY_WAITING_TIME = 5.3
 
-# Measure execution time of a function
+
 def timeit(func):
+    """Measure execution time of a function"""
     @wraps(func)
     def wrapper(*args, **kwargs):
         tic = datetime.now()
@@ -23,8 +24,9 @@ def timeit(func):
         return res
     return wrapper
 
-# Always ensure a valid return
+
 def safe_return(func):
+    """Always ensure a valid return"""
 	@wraps(func)
 	def func_wrapper(*args, **kwargs):
 		try:
@@ -34,9 +36,15 @@ def safe_return(func):
 			return None
 	return func_wrapper
 
-# retry a function for specified number and waiting time;
-# if no parameters are passed into, default values will be used.
+
 def retry(func=None, *, number=RETRY_NUMBER, waiting_time=RETRY_WAITING_TIME):
+    """
+    Retry a function for specified number and waiting time; if no parameters are passed into, default values will be used.
+    :param func:
+    :param number:
+    :param waiting_time:
+    :return:
+    """
 	if func is None:
 		return partial(retry, number=number, waiting_time=waiting_time)
 

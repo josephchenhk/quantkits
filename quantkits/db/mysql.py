@@ -2,7 +2,7 @@
 # @Time    : 2/8/2019 4:40 PM
 # @Author  : Joseph Chen
 # @Email   : josephchenhk@gmail.com
-# @FileName: db.py
+# @FileName: mysql.py
 # @Software: PyCharm
 
 from sqlalchemy import create_engine
@@ -20,6 +20,7 @@ from config.config import MYSQL_CONFIG
 Base = declarative_base()
 
 class DB:
+    """MySQL/MariDB"""
 
     def create_engine(self, user:str, password:str, address:str, port:int, database:str):
         engine = create_engine(f"mysql+pymysql://{user}:{password}@{address}:{port}/{database}?charset=utf8mb4&autocommit=true")
