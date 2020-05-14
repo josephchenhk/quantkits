@@ -14,19 +14,19 @@ RETRY_WAITING_TIME = 5.3
 
 
 def timeit(func):
-    """Measure execution time of a function"""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        tic = datetime.now()
-        res = func(*args, **kwargs)
-        toc = datetime.now()
-        print("{} Elapsed time: {} seconds".format(func.__name__, (toc - tic).seconds))
-        return res
-    return wrapper
+	"""Measure execution time of a function"""
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		tic = datetime.now()
+		res = func(*args, **kwargs)
+		toc = datetime.now()
+		print("{} Elapsed time: {} seconds".format(func.__name__, (toc - tic).seconds))
+		return res
+	return wrapper
 
 
 def safe_return(func):
-    """Always ensure a valid return"""
+	"""Always ensure a valid return"""
 	@wraps(func)
 	def func_wrapper(*args, **kwargs):
 		try:
@@ -38,13 +38,13 @@ def safe_return(func):
 
 
 def retry(func=None, *, number=RETRY_NUMBER, waiting_time=RETRY_WAITING_TIME):
-    """
-    Retry a function for specified number and waiting time; if no parameters are passed into, default values will be used.
-    :param func:
-    :param number:
-    :param waiting_time:
-    :return:
-    """
+	"""
+	Retry a function for specified number and waiting time; if no parameters are passed into, default values will be used.
+	:param func:
+	:param number:
+	:param waiting_time:
+	:return:
+	"""
 	if func is None:
 		return partial(retry, number=number, waiting_time=waiting_time)
 
