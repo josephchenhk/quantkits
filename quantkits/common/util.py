@@ -4,6 +4,9 @@
 # @Email   : josephchenhk@gmail.com
 # @FileName: util.py
 # @Software: PyCharm
+import os
+from typing import Sequence
+
 
 def verify_lang(lang):
 	"""Ensure language is either en or cn"""
@@ -50,3 +53,12 @@ def pascalcase_to_underscore(value):
 			ret += "_"
 		ret += u.__next__()(x)
 	return ret[1:]
+
+def get_files_path(pattern:str, search_folder=os.getcwd())->Sequence[str]:
+	"""Search a folder, and return all abolute paths of files that match specified pattern"""
+	files = []
+	for dirpath, subdirs, files in os.walk(search_folder):
+		for x in files:
+			if pattern in x: # for example, pattern = ".jpg"
+				files.append(os.path.join(dirpath, x))
+	return files
