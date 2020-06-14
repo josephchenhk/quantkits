@@ -4,7 +4,7 @@
 # @Email   : josephchenhk@gmail.com
 # @FileName: decorators.py
 # @Software: PyCharm
-
+import traceback
 from functools import wraps, partial
 from datetime import datetime
 import time
@@ -32,7 +32,7 @@ def safe_return(func):
 		try:
 			return func(*args, **kwargs)
 		except Exception as e:
-			print(e)
+			traceback.print_exc()
 			return None
 	return func_wrapper
 
@@ -54,7 +54,17 @@ def retry(func=None, *, number=RETRY_NUMBER, waiting_time=RETRY_WAITING_TIME):
 			try:
 				return func(*args, **kwargs)
 			except Exception as e:
+				traceback.print_exc()
 				print("{}. Retry after {} seconds.".format(e, waiting_time))
 				time.sleep(waiting_time)
 		raise ConnectionError("Requests are rejected too many times.")
 	return func_wrapper
+
+# Example to use decorators
+# @safe_return
+@retry
+def div(a, b):
+	return a/b
+
+if __name__=="__main__":
+	print(div(3, 0))
