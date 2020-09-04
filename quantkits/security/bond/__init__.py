@@ -90,7 +90,7 @@ def get_previous_coupon_date(cur_date:datetime, all_coupon_dates:list)->datetime
     elif cur_date>all_coupon_dates[-1]:
         return all_coupon_dates[-1]
     else:
-        for coupon_date in all_coupon_dates:
+        for coupon_date in reversed(all_coupon_dates):
             if coupon_date<cur_date:
                 return coupon_date
 
