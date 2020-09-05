@@ -9,30 +9,44 @@ import pandas as pd
 from datetime import datetime
 from scipy.optimize import fsolve
 
-from quantkits.security import Security
 from quantkits.time.conversion import from_timeperiod_to_relativedelta
-
+from quantkits.security import Security
 
 class Bond(Security):
     """Bond with essential features"""
-    N: int
-    IY: float
-    PMT: float
-    FV: float
-    PV: float
-    variables = ("N", "IY", "PMT", "FV", "PV", "tenor", "issued_date", "maturity_date")
+    variables = ("N", "IY", "PMT", "FV", "PV", "PV0", "tenor", "issued_date", "maturity_date", "type", \
+                 "Num_Future_Cpn_Days", "Days_Of_Interval", "Days_To_Next_Cpn_Date", "Yield")
     def __init__(self, **kwargs):
         for var in self.variables:
             if kwargs.get(var) is not None:
                 setattr(self, var, kwargs.get(var))
 
-    def _PV(self, PMT, IY, FV, N):
-        """"""
+    def _PV0(self, PMT, IY, FV, N):
+        """Initial value of the bond immediately after issue"""
         PV = 0
         for n in range(1,N+1):
             PV += PMT / (1 + IY*0.01) ** n
         PV += FV / (1 + IY*0.01) ** n
         return PV
+
+    def _PV(self, PMT:float, IY:float, FV:float, Num_Future_Cpn_Days:int, Days_Of_Interval:int, Days_To_Next_Cpn_Date:int)->float:
+        """Value (dirty price) of the bond at any time before maturity"""
+        PV = 0
+        if Num_Future_Cpn_Days==1:
+            PV = (FV + PMT) / (1 + IY * 0.01)**(Days_To_Next_Cpn_Date/Days_Of_Interval)
+            return PV
+
+        for n in range(1, Num_Future_Cpn_Days):
+            PV += PMT / (1 + IY * 0.01) ** n
+        PV += FV / (1 + IY * 0.01) ** n
+        if Days_To_Next_Cpn_Date==0:
+            return PV
+        elif Days_To_Next_Cpn_Date>0:
+            PV += PMT
+            PV = PV / (1 + IY * 0.01)**(Days_To_Next_Cpn_Date/Days_Of_Interval)
+            return PV
+        else:
+            raise ValueError("Days_To_Next_Cpn_Date should NOT be negative!")
 
     def __getattr__(self, item):
         """"""
@@ -41,18 +55,33 @@ class Bond(Security):
         if item not in self.variables:
             return None
         elif item=="PV":
-            return self._PV(PMT=self.PMT, IY=self.IY, FV=self.FV, N=self.N)
+            return self._PV(PMT=self.PMT,
+                            IY=self.IY,
+                            FV=self.FV,
+                            Num_Future_Cpn_Days=self.Num_Future_Cpn_Days,
+                            Days_Of_Interval=self.Days_Of_Interval,
+                            Days_To_Next_Cpn_Date=self.Days_To_Next_Cpn_Date)
+        elif item=="Yield":
+            return fsolve(lambda x: self._PV(PMT=self.PMT,
+                                             IY=x,
+                                             FV=self.FV,
+                                             Num_Future_Cpn_Days=self.Num_Future_Cpn_Days,
+                                             Days_Of_Interval=self.Days_Of_Interval,
+                                             Days_To_Next_Cpn_Date=self.Days_To_Next_Cpn_Date
+                                             ) - self.PV, 0)[0]
+        elif item=="PV0":
+            return self._PV0(PMT=self.PMT, IY=self.IY, FV=self.FV, N=self.N)
         elif item=="PMT":
-            return fsolve(lambda x: self._PV(PMT=x, IY=self.IY, FV=self.FV, N=self.N)-self.PV, 0)[0]
+            return fsolve(lambda x: self._PV0(PMT=x, IY=self.IY, FV=self.FV, N=self.N)-self.PV0, 0)[0]
         elif item=="IY":
-            return fsolve(lambda x: self._PV(PMT=self.PMT, IY=x, FV=self.FV, N=self.N)-self.PV, 0)[0]
+            return fsolve(lambda x: self._PV0(PMT=self.PMT, IY=x, FV=self.FV, N=self.N)-self.PV0, 0)[0]
         elif item=="FV":
-            return fsolve(lambda x: self._PV(PMT=self.PMT, IY=self.IY, FV=x, N=self.N)-self.PV, 0)[0]
+            return fsolve(lambda x: self._PV0(PMT=self.PMT, IY=self.IY, FV=x, N=self.N)-self.PV0, 0)[0]
         elif item=="N":
-            return fsolve(lambda x: self._PV(PMT=self.PMT, IY=self.IY, FV=self.FV, N=x)-self.PV, 0)[0]
+            return fsolve(lambda x: self._PV0(PMT=self.PMT, IY=self.IY, FV=self.FV, N=x)-self.PV0, 0)[0]
 
     def __str__(self):
-        return f"Bond[{self.__dict__}]"
+        return "Bond[{}]".format(self.__dict__)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
