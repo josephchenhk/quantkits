@@ -15,7 +15,8 @@ from quantkits.security import Security
 class Bond(Security):
     """Bond with essential features"""
     variables = ("N", "IY", "PMT", "FV", "PV", "PV0", "tenor", "issued_date", "maturity_date", "type", \
-                 "Num_Future_Cpn_Days", "Days_Of_Interval", "Days_To_Next_Cpn_Date", "Yield")
+                 "Num_Future_Cpn_Days", "Days_Of_Interval", "Days_To_Next_Cpn_Date", "Yield", \
+                 "Macaulay_Duration", "Modified_Duration", "DV01")
     def __init__(self, **kwargs):
         for var in self.variables:
             if kwargs.get(var) is not None:
@@ -48,6 +49,45 @@ class Bond(Security):
         else:
             raise ValueError("Days_To_Next_Cpn_Date should NOT be negative!")
 
+    def _MacDur_And_Price(self, PMT:float, Yield:float, FV:float, Days_Of_Interval:int, Days_To_Maturity:int)->float:
+        """MacDur of the bond at any time before maturity"""
+        face = FV
+        coupon = PMT
+        discount = Yield
+        maturity = Days_To_Maturity / Days_Of_Interval
+        discounted_final_cf = (face + coupon) / (1 + discount) ** maturity
+        dmac = discounted_final_cf * maturity
+        maturity -= 1
+        discounted_cf = 0
+
+        while maturity > 0:
+            cf = coupon / (1 + discount) ** maturity
+            discounted_cf += cf
+            dmac += cf * maturity
+            maturity -= 1
+
+        price = discounted_cf + discounted_final_cf
+        dmac = dmac / price
+        return dmac, price
+
+    def _MacaulayDuration(self, PMT:float, Yield:float, FV:float, Days_Of_Interval:int, Days_To_Maturity:int)->float:
+        """MacDur of the bond at any time before maturity"""
+        dmac, _ = self.MacDur_And_Price(PMT, Yield, FV, Days_Of_Interval, Days_To_Maturity)
+        return dmac
+
+    def _ModifiedDuration(self, PMT: float, Yield: float, FV: float, Days_Of_Interval: int, Days_To_Maturity: int) -> float:
+        """ModDur of the bond at any time before maturity"""
+        dmac = self._MacaulayDuration(PMT, Yield, FV, Days_Of_Interval, Days_To_Maturity)
+        dmod = dmac / (1 + Yield)
+        return dmod
+
+    def _DV01(self, PMT: float, Yield: float, FV: float, Days_Of_Interval: int, Days_To_Maturity: int) -> float:
+        """DV01 of the bond at any time before maturity"""
+        dmac, price = self._MacDur_And_Price(PMT, Yield, FV, Days_Of_Interval, Days_To_Maturity)
+        dmod = dmac / (1 + Yield)
+        dv01 = 0.0001 * dmod * price
+        return dv01
+
     def __getattr__(self, item):
         """"""
         # >> > x = Symbol('x')
@@ -79,6 +119,15 @@ class Bond(Security):
             return fsolve(lambda x: self._PV0(PMT=self.PMT, IY=self.IY, FV=x, N=self.N)-self.PV0, 0)[0]
         elif item=="N":
             return fsolve(lambda x: self._PV0(PMT=self.PMT, IY=self.IY, FV=self.FV, N=x)-self.PV0, 0)[0]
+        elif item=="Macaulay_Duration":
+            return self._MacaulayDuration(PMT=self.PMT, Yield=self.Yield, FV=self.FV, Days_Of_Interval=self.Days_Of_Interval,
+                                          Days_To_Maturity=self.Days_To_Maturity)
+        elif item=="Modified_Duration":
+            return self._ModifiedDuration(PMT=self.PMT, Yield=self.Yield, FV=self.FV, Days_Of_Interval=self.Days_Of_Interval,
+                                          Days_To_Maturity=self.Days_To_Maturity)
+        elif item=="DV01":
+            return self._DV01(PMT=self.PMT, Yield=self.Yield, FV=self.FV, Days_Of_Interval=self.Days_Of_Interval,
+                              Days_To_Maturity=self.Days_To_Maturity)
 
     def __str__(self):
         return "Bond[{}]".format(self.__dict__)

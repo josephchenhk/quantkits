@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='quantkits', # 包名称，之后如果上传到了pypi，则需要通过该名称下载
-    version='0.0.3',  # version只能是数字，还有其他字符则会报错
+    version='0.0.4',  # version只能是数字，还有其他字符则会报错
     keywords=('setup', 'quantkits'),
     description='setup quantkits',
     long_description='',
