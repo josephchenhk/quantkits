@@ -108,3 +108,5 @@ log/
 *.xmind
 
 *.DS_Store
+
+quantkits/api/*.csv
