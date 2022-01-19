@@ -523,7 +523,7 @@ if __name__=="__main__":
 
             # 保存历史k线
             api.save_history_kline(code=code,
-                                   start="2021-08-13",
+                                   start="2021-08-12",
                                    # end="2021-03-15",
                                    ktype=KLType.K_1M,
                                    fields=[KL_FIELD.ALL]
