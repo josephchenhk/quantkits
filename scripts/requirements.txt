@@ -9,7 +9,7 @@ croniter
 influxdb
 peewee
 beautifulsoup4==4.7.1
-lxml==4.3.1
+lxml==4.9.1
 numpy==1.15.4
 pandas==0.24.1
 pymysql==0.9.3
